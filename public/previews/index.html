@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Meu Convite</title>
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Meu Convite" />
+<meta property="og:description" content="Clique para abrir seu Convite." />
+<meta property="og:image" content="capa_1200x630.jpg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<style>
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  height:100%;
+  background:#000;
+  overflow:hidden;
+}
+
+/* usar SVH como base (est?vel), e DVH quando suportado */
+.phone{
+  width:100vw;
+  height:100vh;      /* fallback antigo */
+  height:100svh;     /* est?vel contra barras */
+  background:#000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+
+  /* respeitar notch/home bar */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+}
+
+@supports (height: 100dvh){
+  .phone{ height:100dvh; }
+}
+
+/* stage nunca pode ultrapassar a ?rea vis?vel real */
+.stage{
+  position:relative;
+  aspect-ratio: 9 / 16;
+  width:auto;
+  max-width:100%;
+  max-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  background:#000;
+  overflow:hidden;
+}
+
+@supports (height: 100dvh){
+  .stage{
+    max-height: calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
+/* 🔥 ESSENCIAL PRA CLIQUE FUNCIONAR */
+.stage img,.stage video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  background:#000;
+  display:none;
+  pointer-events:none !important;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-touch-callout:none;
+}
+
+.show{display:block !important;}
+
+.btn-inv{
+  position:absolute;
+  display:block;
+  z-index:9999;
+  pointer-events:auto;
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  background: transparent !important;
+  padding:0; margin:0;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.btn-inv:focus,
+.btn-inv:focus-visible,
+.btn-inv:active{
+  outline: none !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.pg3-only,.pg4-only{display:none;}
+body.pg3 .pg3-only{display:block;}
+body.pg4 .pg4-only{display:block;}
+
+#startBtn{
+  position:fixed;
+  left:0;
+  top:0;
+  width:100vw;
+  height:100vh;
+  border:0;
+  background:transparent;
+  padding:0;
+  margin:0;
+  z-index:20000;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+#videoTap{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  border:0;
+  background:transparent;
+  z-index:12000;
+  display:none;
+}
+
+
+/* start não pode ficar por cima depois */
+.started #startBtn{display:none !important; pointer-events:none !important;}
+</style>
+</head>
+
+<body>
+<div class="phone" id="phoneX">
+  <div class="stage">
+    <img id="pdCover" class="show" src="capa.jpg" alt="Capa">
+    <button id="startBtn" aria-label="Abrir convite"></button>
+
+    <video id="video" src="video.mp4" playsinline preload="auto"></video>
+    <button id="videoTap" aria-label="Tocar video" style="display:none;"></button>
+
+    <video id="pd3" class="pageMedia" autoplay muted loop playsinline preload="auto"><source src="pagina3.mp4" type="video/mp4"></video>
+    <video id="pd4" class="pageMedia" autoplay muted loop playsinline preload="auto"><source src="pagina4.mp4" type="video/mp4"></video>
+
+    <a class="btn-inv pg3-only" href="#" onclick="mostrarPg4(); return false;" style="left:60.76555023923444%;top:68.59060402684564%;width:18.421052631578945%;height:12.080536912751679%;"></a>
+  <a class="btn-inv pg3-only" href="https://share.google/KlaUlTptceuCwYx61" target="_blank" rel="noopener" style="left:41.38755980861244%;top:68.59060402684564%;width:17.22488038277512%;height:11.946308724832216%;"></a>
+  <a class="btn-inv pg3-only" href="https://wa.me/5521974512664?text=Ol%C3%A1!%20Gostaria%20de%20confirmar%20presen%C3%A7a." target="_blank" rel="noopener" style="left:21.5311004784689%;top:68.45637583892618%;width:18.421052631578945%;height:12.61744966442953%;"></a>
+  <a class="btn-inv pg4-only" href="#" onclick="copiarPix(&#39;21974512664&#39;); return false;" style="left:31.57894736842105%;top:70.20134228187919%;width:40.66985645933015%;height:12.61744966442953%;"></a>
+  <a class="btn-inv pg4-only" href="#" onclick="mostrarPg3(); return false;" style="left:30.861244019138756%;top:21.74496644295302%;width:40.66985645933015%;height:5.906040268456376%;"></a>
+  </div>
+</div>
+
+<audio id="mus" src="musica.mp3" loop preload="auto" playsinline></audio>
+
+<script>
+const cover = document.getElementById("pdCover");
+const startBtn = document.getElementById("startBtn");
+const video = document.getElementById("video");
+const vid = video;
+const videoTap = document.getElementById("videoTap");
+const mus = document.getElementById("mus");
+let audioLiberado = false;
+let baseMusicVolume = 1;
+let duckApplied = false;
+const duckEnabled = false;
+const DUCK_FACTOR = 0.2;
+
+function syncBaseVolume(){
+  if(!mus || duckApplied) return;
+  baseMusicVolume = typeof mus.volume === "number" ? mus.volume : 1;
+}
+function applyDuck(){
+  if(!duckEnabled || !mus) return;
+  if(duckApplied) return;
+  syncBaseVolume();
+  mus.volume = Math.max(0, Math.min(1, baseMusicVolume * DUCK_FACTOR));
+  duckApplied = true;
+}
+function restoreMusic(){
+  if(!duckEnabled || !mus) return;
+  mus.volume = Math.max(0, Math.min(1, baseMusicVolume));
+  duckApplied = false;
+}
+
+function hideAllMedia(){
+  if(cover) cover.classList.remove("show");
+  if(vid) vid.classList.remove("show");
+  document.querySelectorAll('img[id^="pd"],video[id^="pd"]').forEach(el => el.classList.remove("show"));
+}
+function clearPgClasses(){
+  ["pg3","pg4"].forEach(c => document.body.classList.remove(c));
+}
+async function liberarAudioIOS(){
+  if(!mus || audioLiberado) return;
+  try{
+    await mus.play();
+    audioLiberado = true;
+    syncBaseVolume();
+  }catch(e){}
+}
+
+function copiarPix(chave){
+  if(!chave) return;
+
+  function toast(msg){
+    let el = document.getElementById("pixToast");
+    if(!el){
+      el = document.createElement("div");
+      el.id = "pixToast";
+
+      el.style.position = "fixed";  // <<< IMPORTANTE (não absolute)
+      el.style.left = "50%";
+      el.style.bottom = "24px";
+      el.style.transform = "translateX(-50%)";
+      el.style.padding = "12px 16px";
+      el.style.borderRadius = "12px";
+      el.style.background = "rgba(0,0,0,0.85)";
+      el.style.color = "#fff";
+      el.style.font = "14px system-ui, -apple-system, Segoe UI, Roboto";
+      el.style.zIndex = "999999";   // <<< acima de tudo
+      el.style.pointerEvents = "none";
+      el.style.transition = "opacity .25s ease";
+      el.style.opacity = "0";
+
+      document.body.appendChild(el);  // <<< anexar no body, não no stage
+    }
+
+    el.textContent = msg;
+    el.style.opacity = "1";
+
+    clearTimeout(el._t);
+    el._t = setTimeout(()=>{
+      el.style.opacity = "0";
+    },1500);
+  }
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(chave).catch(()=>{});
+    toast("✅ Pix copiado!");
+  }else{
+    const ta=document.createElement("textarea");
+    ta.value=chave; document.body.appendChild(ta);
+    ta.select(); try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta);
+    toast("✅ Pix copiado!");
+  }
+}
+
+function mostrarPg3(){
+  clearPgClasses();
+  document.body.classList.add("pg3");
+  hideAllMedia();
+  const el = document.getElementById("pd3");
+  if(el) el.classList.add("show");
+}
+
+function mostrarPg4(){
+  clearPgClasses();
+  document.body.classList.add("pg4");
+  hideAllMedia();
+  const el = document.getElementById("pd4");
+  if(el) el.classList.add("show");
+}
+
+startBtn.addEventListener("click", async () => {
+  document.body.classList.add("started");
+  await liberarAudioIOS();
+
+  startBtn.style.display="none";
+  startBtn.style.pointerEvents="none";
+  if(cover) cover.classList.remove("show");
+
+  if(vid && (vid.currentSrc || vid.getAttribute("src"))){
+    vid.loop=false;
+    vid.muted=true;
+    vid.volume=1;
+    vid.classList.add("show");
+    try{
+      await vid.play();
+      vid.muted=false;
+      if(videoTap) videoTap.style.display="none";
+    }catch(e){
+      // NAO IR PRA PG3
+      // fica na pg2 e libera toque do usuario para iniciar
+      if(videoTap) videoTap.style.display="block";
+    }
+  }else{
+    mostrarPg3();
+  }
+});
+
+if(vid && videoTap){
+  videoTap.addEventListener("click", async ()=>{
+    try{
+      await vid.play();
+      vid.muted=false;
+      videoTap.style.display="none";
+    }catch(e){}
+  });
+}
+
+if(vid){
+  vid.addEventListener("play", () => { applyDuck(); }, { passive:true });
+  vid.addEventListener("pause", () => { restoreMusic(); }, { passive:true });
+  vid.addEventListener("ended", () => { restoreMusic(); }, { passive:true });
+  vid.addEventListener("emptied", () => { restoreMusic(); }, { passive:true });
+  vid.addEventListener("ended", async () => {
+    await liberarAudioIOS();
+    mostrarPg3();
+  });
+}
+</script>
+</body>
+</html>
