@@ -1,22 +1,32 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { put } from '@vercel/blob'
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' })
+export default async function handler(req, res) {
+  // CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Preflight
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  const { filename, file } = req.body
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const { filename, file } = req.body;
 
   if (!filename || !file) {
-    return res.status(400).json({ error: 'Missing data' })
+    return res.status(400).json({ error: 'Missing data' });
   }
 
-  const buffer = Buffer.from(file, 'base64')
+  const buffer = Buffer.from(file, 'base64');
 
   const blob = await put(`previews/${filename}`, buffer, {
-    access: 'public'
-  })
+    access: 'public',
+  });
 
-  return res.status(200).json({ url: blob.url })
+  return res.status(200).json({ url: blob.url });
 }
